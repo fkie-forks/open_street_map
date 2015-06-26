@@ -46,6 +46,7 @@ import sys
 
 from route_network import planner
 
+from geographic_msgs.msg import GeoPath
 from geographic_msgs.msg import RouteNetwork
 from geographic_msgs.msg import RoutePath
 from geographic_msgs.srv import GetRoutePlan
@@ -127,12 +128,17 @@ class RoutePlannerNode():
 
         try:
             # plan a path to the goal
-            self.resp.plan, self.resp.network, self.resp.start_seg, self.resp.goal_seg, self.resp.distance = self.planner.geo_path(req)
+            planner_result = self.planner.geo_path(req)
+            self.resp.plan.points = planner_result[0]
+            self.resp.plan.network = planner_result[1]
+            self.resp.plan.start_seg = planner_result[2]
+            self.resp.plan.goal_seg = planner_result[3]
+            self.resp.plan.distance = planner_result[4]
         except (ValueError) as e:
             self.resp.success = False
             self.resp.status = str(e)
-            self.resp.network = self.graph.id
-            self.resp.distance = -1
+            self.resp.plan.network = self.graph.id
+            self.resp.plan.distance = -1
             rospy.logerr('route planner exception: ' + str(e))
         else:
             self.resp.success = not (self.resp.distance == -1)
