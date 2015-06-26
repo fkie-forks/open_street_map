@@ -15,7 +15,7 @@ set(_ROS_PKG_DEPS
 
 # Find catkin macros and libraries, also other catkin packages.
 find_package(catkin REQUIRED COMPONENTS ${_ROS_PKG_DEPS})
-include_directories(include ${catkin_INCLUDE_DIRS})
+#include_directories(include ${catkin_INCLUDE_DIRS})
 catkin_python_setup()
 
 # auto-generate dynamic reconfiguration GUI: before catkin_package()
@@ -38,7 +38,7 @@ if (CATKIN_ENABLE_TESTING)
   catkin_add_nosetests(tests/test_xml_map.py)
 
   # check all the launch files
-  find_package(roslaunch REQUIRED)
-  roslaunch_add_file_check(launch)
+#  find_package(roslaunch REQUIRED)
+#  roslaunch_add_file_check(launch)
 
-endif (CATKIN_ENABLE_TESTING)
+endif()
