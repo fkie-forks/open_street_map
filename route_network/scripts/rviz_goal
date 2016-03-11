@@ -167,7 +167,7 @@ class RvizGoalListener():
                     print "Start:", self._own_geo_point
                     print "Goal:", geo_goal
                     print "PLAN", path_plan
-                    self._pub_viz_path(path_plan.plan, self._own_geo_point, geo_goal, path_plan.start_seg, path_plan.goal_seg, path_plan.distance)
+                    self._pub_viz_path(path_plan.plan.points, self._own_geo_point, geo_goal, path_plan.plan.start_seg, path_plan.plan.goal_seg, path_plan.plan.distance)
                 except (tf.Exception, tf.LookupException, tf.ConnectivityException):
                     import traceback
                     print traceback.format_exc()

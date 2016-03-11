@@ -20,6 +20,9 @@
   <!-- route planning node -->
   <node pkg="route_network" type="plan_route" name="plan_route" />
 
+  <node pkg="tf" type="static_transform_publisher" name="local_map_tf"
+        args="622150 3362350 0 0 0 0 1 map local_map 100" />
+
   <!-- start route planning, with visualization
   <include file="$(find route_network)/launch/viz_plan.launch" />
   -->

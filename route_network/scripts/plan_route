@@ -141,7 +141,7 @@ class RoutePlannerNode():
             self.resp.plan.distance = -1
             rospy.logerr('route planner exception: ' + str(e))
         else:
-            self.resp.success = not (self.resp.distance == -1)
+            self.resp.success = not (self.resp.plan.distance == -1)
             if not self.resp.success:
               self.resp.status = 'no route found from:\n'  + str(req.start) + ' to:\n' + str(req.goal)
         return self.resp
