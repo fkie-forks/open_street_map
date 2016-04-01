@@ -45,17 +45,17 @@ Route network path planner.
 PKG = 'route_network'
 import roslib; roslib.load_manifest(PKG)
 
-import numpy
 import math
-
-import geodesy.utm
-import geodesy.wu_point
+import numpy
 
 from geographic_msgs.msg import GeoPoint
 from geographic_msgs.msg import RouteNetwork
 from geographic_msgs.msg import RoutePath
 from geographic_msgs.msg import RouteSegment
 from geographic_msgs.srv import GetRoutePlan
+import geodesy.utm
+import geodesy.wu_point
+
 
 class PlannerError(Exception):
     """Base class for exceptions in this module."""
@@ -295,7 +295,7 @@ class Planner():
         opened.append([length_start2seg_start, start__seg_start_idx])
 
         closed = [0 for wid in xrange(len(self.points))]
-        closed[start__seg_start_idx] = True
+        closed[start__seg_start_idx] = -1.
         backpath = [None for wid in xrange(len(self.points))]
         reached_goal = None
         while True:
