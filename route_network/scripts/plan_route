@@ -41,19 +41,18 @@ Plan the shortest route through a geographic information network.
 
 PKG_NAME = 'route_network'
 import roslib; roslib.load_manifest(PKG_NAME)
-import rospy
 import sys
-
-from route_network import planner
 
 from geographic_msgs.msg import GeoPath
 from geographic_msgs.msg import RouteNetwork
 from geographic_msgs.msg import RoutePath
-from geographic_msgs.srv import GetRoutePlan
-from geographic_msgs.srv import GetRoutePlanResponse
 from geographic_msgs.srv import GetGeoPath
 from geographic_msgs.srv import GetGeoPathResponse
+from geographic_msgs.srv import GetRoutePlan
+from geographic_msgs.srv import GetRoutePlanResponse
+from route_network import planner
 import geodesy
+import rospy
 
 
 class RoutePlannerNode():
@@ -64,6 +63,7 @@ class RoutePlannerNode():
         rospy.init_node('route_planner')
         self.graph = None
         self.planner = None
+        self._calc_idx = 0
 
         # advertise route planning service
         self.srv = rospy.Service('get_route_plan', GetRoutePlan,
@@ -119,7 +119,10 @@ class RoutePlannerNode():
         :return: GetGeoPathResponse message
         """
         rospy.loginfo('GetGeoPath: ' + str(req))
+        self._calc_idx += 1
         self.resp = GetGeoPathResponse()
+        self.resp.plan.header.seq = self._calc_idx
+        self.resp.plan.header.stamp = rospy.Time.now()
         if self.graph is None:
             self.resp.success = False
             self.resp.status = 'no RouteNetwork available for GetGeoPath'
@@ -134,16 +137,16 @@ class RoutePlannerNode():
             self.resp.plan.start_seg = planner_result[2]
             self.resp.plan.goal_seg = planner_result[3]
             self.resp.plan.distance = planner_result[4]
+            self.resp.success = not (self.resp.plan.distance == -1)
+            if not self.resp.success:
+              self.resp.status = 'no route found from:\n' + str(req.start) + ' to:\n' + str(req.goal)
+            rospy.loginfo('GetGeoPath result: ' + str(self.resp))
         except (ValueError) as e:
             self.resp.success = False
             self.resp.status = str(e)
             self.resp.plan.network = self.graph.id
             self.resp.plan.distance = -1
             rospy.logerr('route planner exception: ' + str(e))
-        else:
-            self.resp.success = not (self.resp.plan.distance == -1)
-            if not self.resp.success:
-              self.resp.status = 'no route found from:\n'  + str(req.start) + ' to:\n' + str(req.goal)
         return self.resp
 
 def main():
