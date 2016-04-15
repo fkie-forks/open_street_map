@@ -219,6 +219,11 @@ class Planner():
         if route_path.segments:
             seg = self._getSegment(route_path.segments[0])
             p = self._get_min_point(start_seg, start_lot)
+            # add the start point if it is not close to the route
+            start_utm = geodesy.utm.fromMsg(req.start)
+            dist_first_to_start = self.distance2D(p, start_utm)
+            if dist_first_to_start > self._shift_to_route_within:
+              result.append(req.start)
             result.append(p.toMsg())
             # add only the endpoints of the segments
             for index in xrange(len(route_path.segments)):
