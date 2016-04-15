@@ -55,6 +55,7 @@ from geographic_msgs.msg import RouteSegment
 from geographic_msgs.srv import GetRoutePlan
 import geodesy.utm
 import geodesy.wu_point
+import rospy
 
 
 class PlannerError(Exception):
@@ -93,6 +94,9 @@ class Planner():
         Collects relevant information from route network message,
         providing convenient access to the data.
         """
+        self._shift_to_route_within = rospy.get_param('~shift_to_route_within', 7.)
+        rospy.loginfo("~shift_to_route_within: %.2f", self._shift_to_route_within)
+
         self.graph = graph
         self.points = geodesy.wu_point.WuPointSet(graph.points)
 
@@ -222,7 +226,7 @@ class Planner():
                 seg = self._getSegment(seg_id)
 
                 if index == 0:
-                    # add the start point, if the plan segment and nearest segment are not equal
+                    # add the segment start point, if the plan segment and nearest segment are not equal
                     if not ((seg.end.uuid == start_seg.start.uuid and seg.start.uuid == start_seg.end.uuid)
                         or (seg.start.uuid == start_seg.start.uuid and seg.end.uuid == start_seg.end.uuid)):
                         result.append(self.points[seg.start.uuid].position())
@@ -236,8 +240,11 @@ class Planner():
             # add a perpendicular point or the nearest endpoint of the end segment
             p = self._get_min_point(goal_seg, goal_lot)
             result.append(p.toMsg())
-            # add the destination point
-            result.append(req.goal)
+            # add the destination point if it is not close to the route
+            goal_utm = geodesy.utm.fromMsg(req.goal)
+            dist_last_to_goal = self.distance2D(p, goal_utm)
+            if dist_last_to_goal > self._shift_to_route_within:
+              result.append(req.goal)
         else:
             if ((start_seg.end.uuid == goal_seg.start.uuid and start_seg.start.uuid == goal_seg.end.uuid)
                 or (start_seg.start.uuid == goal_seg.start.uuid and start_seg.end.uuid == goal_seg.end.uuid)):
