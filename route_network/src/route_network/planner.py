@@ -215,12 +215,13 @@ class Planner():
           (route_path, dist) = self._planner_seg(req.start, start_seg, req.goal, goal_seg)
         except NoPathToGoalError, e:
           return result, self.graph.id, start_seg.id, goal_seg.id, -1
+        start_utm = geodesy.utm.fromMsg(req.start)
+        goal_utm = geodesy.utm.fromMsg(req.goal)
         # copy the route to the result list and adds the start and/or goal position to the path
         if route_path.segments:
             seg = self._getSegment(route_path.segments[0])
             p = self._get_min_point(start_seg, start_lot)
             # add the start point if it is not close to the route
-            start_utm = geodesy.utm.fromMsg(req.start)
             dist_first_to_start = self.distance2D(p, start_utm)
             if dist_first_to_start > self._shift_to_route_within:
               result.append(req.start)
@@ -246,15 +247,20 @@ class Planner():
             p = self._get_min_point(goal_seg, goal_lot)
             result.append(p.toMsg())
             # add the destination point if it is not close to the route
-            goal_utm = geodesy.utm.fromMsg(req.goal)
             dist_last_to_goal = self.distance2D(p, goal_utm)
             if dist_last_to_goal > self._shift_to_route_within:
               result.append(req.goal)
+            if len(result) == 2:
+              p1_utm = geodesy.utm.fromMsg(result[0])
+              p2_utm = geodesy.utm.fromMsg(result[1])
+              dist = dist = self.distance2D(p1_utm, p2_utm)
         else:
             if ((start_seg.end.uuid == goal_seg.start.uuid and start_seg.start.uuid == goal_seg.end.uuid)
                 or (start_seg.start.uuid == goal_seg.start.uuid and start_seg.end.uuid == goal_seg.end.uuid)):
                 # direct connection
+                result.append(req.start)
                 result.append(req.goal)
+                dist = self.distance2D(start_utm, goal_utm)
         return result, self.graph.id, start_seg.id, goal_seg.id, dist
 
     def _planner_seg(self, start_geo_point, start_seg, goal_geo_point, goal_seg):
