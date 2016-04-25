@@ -250,17 +250,22 @@ class Planner():
             dist_last_to_goal = self.distance2D(p, goal_utm)
             if dist_last_to_goal > self._shift_to_route_within:
               result.append(req.goal)
-            if len(result) == 2:
-              p1_utm = geodesy.utm.fromMsg(result[0])
-              p2_utm = geodesy.utm.fromMsg(result[1])
-              dist = dist = self.distance2D(p1_utm, p2_utm)
         else:
             if ((start_seg.end.uuid == goal_seg.start.uuid and start_seg.start.uuid == goal_seg.end.uuid)
                 or (start_seg.start.uuid == goal_seg.start.uuid and start_seg.end.uuid == goal_seg.end.uuid)):
                 # direct connection
                 result.append(req.start)
                 result.append(req.goal)
-                dist = self.distance2D(start_utm, goal_utm)
+        # calculate the distance
+        last_utm = None
+        dist = 0
+        for point in result:
+          if last_utm is None:
+            last_utm = geodesy.utm.fromMsg(point)
+          else:
+            new_utm = geodesy.utm.fromMsg(point)
+            dist += self.distance2D(last_utm, new_utm)
+            last_utm = new_utm
         return result, self.graph.id, start_seg.id, goal_seg.id, dist
 
     def _planner_seg(self, start_geo_point, start_seg, goal_geo_point, goal_seg):
