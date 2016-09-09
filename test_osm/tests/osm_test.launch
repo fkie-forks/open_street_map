@@ -5,7 +5,8 @@
 
 <launch>
 
-  <arg name="url" default="package://test_osm/tests/prc.osm" />
+<!--  <arg name="url" default="package://test_osm/tests/prc.osm" />-->
+  <arg name="url" default="package://test_osm/tests/fkie.osm" />
 
   <!-- start map server, with visualization -->
   <include file="$(find osm_cartography)/launch/viz_osm.launch" >
@@ -20,8 +21,9 @@
   <!-- route planning node -->
   <node pkg="route_network" type="plan_route" name="plan_route" />
 
-  <node pkg="tf" type="static_transform_publisher" name="local_map_tf"
-        args="622150 3362350 0 0 0 0 1 map local_map 100" />
+  <node required="true" name="tf_world_tedesus_map" pkg="tf_tools_fkie" type="static_transform_publisher" args="367665.967 5608936.0245 0 0 0 0 map local_map 100">
+    <param name="capability_group" value="tf"/>
+  </node>
 
   <!-- start route planning, with visualization
   <include file="$(find route_network)/launch/viz_plan.launch" />

@@ -219,7 +219,7 @@ class VizNode():
         try:
             resp = self.get_map(config['map_url'], bounding_box.makeGlobal())
         except rospy.ServiceException as e:
-            rospy.logerr("Service call failed:", str(e))
+            rospy.logerr("Service call failed: %s" % str(e))
             # ignore new config, it failed
         else:                           # get_map returned
             if resp.success:
